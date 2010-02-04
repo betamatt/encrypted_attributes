@@ -124,10 +124,15 @@ module EncryptedAttributes
       
       # Set the encrypted value on the configured callback
       callback = options.delete(:on) || :before_validation
-      send(callback, :if => options.delete(:if), :unless => options.delete(:unless)) do |record|
-        record.send(:write_encrypted_attribute, attr_name, to_attr_name, cipher_class, config)
+      
+      # Create a callback method to execute on the callback event
+      function = options.delete(:callback) || :encrypted_attributes_execute_callback
+      define_method function do
+        send(:write_encrypted_attribute, attr_name, to_attr_name, cipher_class, config || options)
         true
       end
+      send(callback, function, :if => options.delete(:if), :unless => options.delete(:unless))
+      send(:private, function)
       
       # Define virtual source attribute
       if attr_name != to_attr_name && !column_names.include?(attr_name)
