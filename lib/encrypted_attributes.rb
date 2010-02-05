@@ -126,7 +126,7 @@ module EncryptedAttributes
       callback = options.delete(:on) || :before_validation
       
       # Create a callback method to execute on the callback event
-      function = options.delete(:callback) || :encrypted_attributes_execute_callback
+      function = :"encrypt_#{attr_name}_#{callback}"
       define_method function do
         send(:write_encrypted_attribute, attr_name, to_attr_name, cipher_class, config || options)
         true
